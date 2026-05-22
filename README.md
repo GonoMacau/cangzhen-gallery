@@ -88,6 +88,20 @@ npm run dev
 4. Deploy。
 5. 部署完成後，進入 Supabase Dashboard → Authentication → URL Configuration，把 `Site URL` 設為您的正式網址，並把該網址加入 `Redirect URLs`。
 
+### LINE 登入設定
+
+LINE 登入需要在 Supabase 內建立 **Custom OAuth Provider**（型別必須為 `OAuth2` 而非 OIDC，
+否則會出現「Error getting user profile from external provider」錯誤）。
+
+詳細逐步設定請見：[docs/line-login-setup.md](./docs/line-login-setup.md)
+
+或一鍵透過腳本建立：
+
+```bash
+LINE_CHANNEL_ID=xxxx LINE_CHANNEL_SECRET=xxxx \
+  node scripts/setup-line-provider.mjs
+```
+
 ## 三、日常維護
 
 ### 父親要新增一件藏品

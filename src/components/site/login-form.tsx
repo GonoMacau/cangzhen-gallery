@@ -44,10 +44,37 @@ function LineIcon() {
 
 type Mode = "signin" | "signup";
 
+function translateAuthError(error: string | null, errorCode: string | null): string | null {
+  if (!error && !errorCode) return null;
+  const raw = error ?? errorCode ?? "";
+  const lower = raw.toLowerCase();
+
+  if (lower.includes("error getting user profile from external provider")) {
+    return "外部登入失敗：無法取得 LINE 帳號資料。請聯絡網站管理員，確認 Supabase 內的 LINE Provider 已設為「OAuth2」類型並啟用「Allow users without email」。";
+  }
+  if (lower.includes("user already registered")) {
+    return "此 Email 已註冊過，請改用登入。";
+  }
+  if (lower.includes("invalid login credentials")) {
+    return "帳號或密碼錯誤，請重新確認。";
+  }
+  if (lower.includes("email not confirmed")) {
+    return "Email 尚未驗證，請至信箱完成驗證後再登入。";
+  }
+  if (lower.includes("provider is not enabled")) {
+    return "該登入方式尚未啟用，請聯絡網站管理員。";
+  }
+  return raw;
+}
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
+  const authError = translateAuthError(
+    searchParams.get("error"),
+    searchParams.get("error_code"),
+  );
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -120,6 +147,12 @@ export function LoginForm() {
 
   return (
     <div className="space-y-4">
+      {authError && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          {authError}
+        </div>
+      )}
+
       <Button
         type="button"
         variant="outline"
