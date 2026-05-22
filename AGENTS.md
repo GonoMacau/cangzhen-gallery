@@ -195,3 +195,39 @@ npm run typecheck  # tsc --noEmit
 7. `src/app/admin/items/actions.ts` — Server Action 範本
 
 讀完這 7 檔即可承接 95% 開發任務，其他細節再依「§7 快速定位表」按需查。
+
+---
+
+## Cursor Cloud specific instructions
+
+### 環境需求
+
+- **Node.js 18.18+**（VM 已預裝 v22）
+- 套件管理器：`npm`（lockfile 為 `package-lock.json`）
+- 更新腳本已設定 `npm install`，每次啟動會自動安裝依賴
+
+### 啟動 Dev Server
+
+```bash
+npm run dev   # Next.js 16 + Turbopack，localhost:3000
+```
+
+### 必要環境變數（Secrets）
+
+應用程式需要以下 secrets 才能正常提供頁面（不設時 dev server 仍會啟動，但所有頁面回傳 500）：
+
+| Secret 名稱 | 用途 |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 專案 URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/publishable key |
+| `SUPABASE_SERVICE_ROLE_KEY` | 管理員操作（上傳、刪除 storage） |
+| `POE_API_KEY`（可選） | AI 補述功能 |
+
+設定方式：在 `.env.local` 中填入，或透過 Cursor Cloud Agent Secrets 注入。
+
+### 重要注意事項
+
+- **沒有本地資料庫**：專案使用託管 Supabase（無 docker-compose、無 supabase CLI config），所有資料操作都依賴遠端 Supabase 實例。
+- **沒有自動化測試框架**：`package.json` 中無 Jest / Vitest / Playwright，驗證方式為 `npm run lint` + `npm run typecheck` + 手動測試。
+- **Build 驗證**：`npm run build` 可完整編譯所有路由，作為部署前的最終檢查。
+- **Middleware 位置**：Next.js middleware 在 `src/proxy.ts`（非標準的 `middleware.ts`），不要重複建立。

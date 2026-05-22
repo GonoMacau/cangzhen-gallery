@@ -31,6 +31,17 @@ function GoogleIcon() {
   );
 }
 
+function LineIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
+      <path
+        fill="#06C755"
+        d="M12 2C6.48 2 2 5.82 2 10.5c0 4.21 3.74 7.74 8.79 8.4.34.07.81.23.93.52.1.27.07.68.03.95l-.15.91c-.05.27-.21 1.07.94.58 1.15-.48 6.2-3.65 8.46-6.25C22.88 13.52 22 12.07 22 10.5 22 5.82 17.52 2 12 2zm-3.19 11.3H6.73a.53.53 0 0 1-.53-.53V8.53c0-.3.24-.53.53-.53.3 0 .53.24.53.53v3.72h1.55c.3 0 .53.24.53.53 0 .3-.24.53-.53.53zm1.84-.53a.53.53 0 0 1-1.06 0V8.53a.53.53 0 0 1 1.06 0v4.24zm4.56 0c0 .22-.13.41-.33.49a.53.53 0 0 1-.58-.11l-2.12-2.89v2.51a.53.53 0 0 1-1.06 0V8.53c0-.22.13-.41.33-.49a.53.53 0 0 1 .58.11l2.12 2.89V8.53a.53.53 0 0 1 1.06 0v4.24zm3.06-2.67a.53.53 0 0 1 0 1.06H16.9v1.08h1.37a.53.53 0 0 1 0 1.06H16.37a.53.53 0 0 1-.53-.53V8.53c0-.3.24-.53.53-.53h1.9a.53.53 0 0 1 0 1.06H16.9v1.04h1.37z"
+      />
+    </svg>
+  );
+}
+
 type Mode = "signin" | "signup";
 
 export function LoginForm() {
@@ -43,6 +54,7 @@ export function LoginForm() {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [lineLoading, setLineLoading] = useState(false);
 
   async function handleGoogle() {
     setGoogleLoading(true);
@@ -56,6 +68,21 @@ export function LoginForm() {
     if (error) {
       toast.error(`Google 登入失敗：${error.message}`);
       setGoogleLoading(false);
+    }
+  }
+
+  async function handleLine() {
+    setLineLoading(true);
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "custom:line" as "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+      },
+    });
+    if (error) {
+      toast.error(`LINE 登入失敗：${error.message}`);
+      setLineLoading(false);
     }
   }
 
@@ -102,6 +129,17 @@ export function LoginForm() {
       >
         <GoogleIcon />
         {googleLoading ? "跳轉中…" : "使用 Google 帳號登入"}
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full gap-2"
+        onClick={handleLine}
+        disabled={lineLoading}
+      >
+        <LineIcon />
+        {lineLoading ? "跳轉中…" : "使用 LINE 帳號登入"}
       </Button>
 
       <div className="relative">
