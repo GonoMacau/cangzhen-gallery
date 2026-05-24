@@ -225,6 +225,16 @@ npm run dev   # Next.js 16 + Turbopack，localhost:3000
 
 設定方式：在 `.env.local` 中填入，或透過 Cursor Cloud Agent Secrets 注入。
 
+> **Cloud Agent 注意**：Secrets 注入為 shell 環境變數，但 Next.js Turbopack dev server 需要 `.env.local` 檔案才能正確內嵌 `NEXT_PUBLIC_*` 至 client bundle。啟動前需用 Python 或 shell 將環境變數寫入 `.env.local`：
+> ```bash
+> python3 -c "
+> import os
+> keys = ['NEXT_PUBLIC_SITE_URL','NEXT_PUBLIC_SUPABASE_URL','NEXT_PUBLIC_SUPABASE_ANON_KEY','SUPABASE_SERVICE_ROLE_KEY','POE_API_KEY','POE_BASE_URL']
+> with open('.env.local','w') as f:
+>     f.writelines(f'{k}={os.environ.get(k,\"\")}\n' for k in keys)
+> "
+> ```
+
 ### 重要注意事項
 
 - **沒有本地資料庫**：專案使用託管 Supabase（無 docker-compose、無 supabase CLI config），所有資料操作都依賴遠端 Supabase 實例。
