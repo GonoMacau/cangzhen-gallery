@@ -1,7 +1,7 @@
 # 藏珍閣 · 天王星名藝社
 
 
-> 古玩藝品線上典藏網站。Next.js 15 + Supabase + POE AI。
+> 古玩藝品線上典藏網站。Next.js 16 + Supabase + POE AI。
 
 ## 功能總覽
 
@@ -11,9 +11,10 @@
 - 單品詳情頁（多圖瀏覽、SEO/OG 分享卡）
 - 分類列表與分類詳情
 
-### 會員區（註冊登入）
+### 會員區（登入後）
+- 登入方式：**Google**、**LINE**、或 **Email** 註冊／登入
 - 留言（即時、Supabase Realtime）
-- 私訊藏家 messagebox
+- 私訊藏家（訊息中心）
 
 ### 後台（管理員 admin）
 - 儀表板（藏品/未讀訊息統計）
@@ -22,6 +23,7 @@
 - **AI 一鍵補述**：呼叫 POE AI（預設 `gpt-5.5`）依品名與藏家簡述產生詳細介紹
 - 分類管理
 - 訊息收件匣（即時）
+- 使用者管理（角色調整、禁言）
 - 站點設定（圖片壓縮、AI 模型、聯絡資訊、關於頁文字）
 
 ## 技術棧
@@ -50,7 +52,7 @@ cp .env.example .env.local
 |---|---|
 | `NEXT_PUBLIC_SITE_URL` | 開發 `http://localhost:3000`，正式 `https://your-domain` |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → Project Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 同上（anon public） |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 同上（anon public；或改用新版 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`） |
 | `SUPABASE_SERVICE_ROLE_KEY` | 同上（service_role，**只能放 server**） |
 | `POE_API_KEY` | https://poe.com/api_key |
 | `POE_BASE_URL` | 預設 `https://api.poe.com/v1` 即可 |
@@ -61,10 +63,13 @@ cp .env.example .env.local
 
 1. `supabase/migrations/0001_init.sql`（建表、RLS、Storage bucket、種子資料）
 2. `supabase/migrations/0002_promote_admin_helper.sql`（建立提升 admin 用的 function）
+3. `supabase/migrations/0003_user_ban.sql`（使用者禁言欄位與留言 policy）
+4. `supabase/migrations/0004_profile_relations.sql`（PostgREST 關聯至 profiles）
+5. `supabase/migrations/0005_oauth_metadata_fallback.sql`（LINE/Google OAuth 暱稱與頭像回填）
 
 ### 3. 將父親的帳號設定為管理員
 
-1. 父親到網站 `/login` 用 Email 註冊一次。
+1. 父親到網站 `/login` 用 **Email** 註冊一次（若使用 LINE/Google 登入且無 email，請改在 Supabase Dashboard 手動將該使用者的 `profiles.role` 設為 `admin`）。
 2. 在 Supabase SQL Editor 執行：
    ```sql
    select public.promote_to_admin('your_dad_email@example.com');
@@ -142,8 +147,10 @@ src/
     queries.ts              藏品/分類查詢 helper
     constants.ts            分類預設值與設定 schema
     utils.ts                cn / slugify / formatDate
-  middleware.ts             Supabase session refresh
+  proxy.ts                  Next.js middleware（Supabase session refresh）
 ```
+
+另見 `docs/line-login-setup.md` 與 `scripts/setup-line-provider.mjs`（LINE Custom OAuth2 Provider 設定）。
 
 ## 五、常見問題
 

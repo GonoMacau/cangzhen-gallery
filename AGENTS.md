@@ -8,7 +8,7 @@
 ## 1. 專案一句話定位
 
 **藏珍閣 / 天王星名藝社** — 古玩藝品線上典藏網站。
-父親（單一管理員）上架藏品、AI 自動補述、訪客可瀏覽 / 留言 / 私訊。
+父親（單一管理員）上架藏品、AI 自動補述、訪客可瀏覽 / 留言 / 私訊（登入支援 Google、LINE、Email）。
 
 部署目標：**Vercel Hobby**（免費方案，注意 serverless 限制）。
 
@@ -83,7 +83,9 @@ src/
 supabase/migrations/
 ├── 0001_init.sql                 ← 全 schema、RLS、Storage bucket、種子資料
 ├── 0002_promote_admin_helper.sql ← promote_to_admin(email) function
-└── 0003_user_ban.sql             ← profiles.is_banned 欄位 + 留言 policy 更新
+├── 0003_user_ban.sql             ← profiles.is_banned 欄位 + 留言 policy 更新
+├── 0004_profile_relations.sql    ← FK 改指向 profiles（PostgREST 內嵌 join）
+└── 0005_oauth_metadata_fallback.sql ← LINE/Google OAuth 暱稱與頭像回填
 ```
 
 ---
@@ -167,6 +169,7 @@ if (!admin) return { ok: false, message: "未授權" };
 | 新增藝品分類 | 後台 → 分類管理；或編輯 `DEFAULT_CATEGORIES` 並 reseed |
 | 新增 UI 基礎元件 | `src/components/ui/<name>.tsx`（仿其他檔案的 cva 寫法） |
 | 修改全域樣式 / 主題色 | `src/app/globals.css`（Tailwind v4 用 `@theme`） |
+| 設定 LINE 登入 | `docs/line-login-setup.md` 或 `scripts/setup-line-provider.mjs` |
 
 ---
 
@@ -224,6 +227,16 @@ npm run dev   # Next.js 16 + Turbopack，localhost:3000
 | `POE_API_KEY`（可選） | AI 補述功能 |
 
 設定方式：在 `.env.local` 中填入，或透過 Cursor Cloud Agent Secrets 注入。
+
+> **Cloud Agent 注意**：Secrets 注入為 shell 環境變數，但 Next.js Turbopack dev server 需要 `.env.local` 檔案才能正確內嵌 `NEXT_PUBLIC_*` 至 client bundle。啟動前需將環境變數寫入 `.env.local`：
+> ```bash
+> python3 -c "
+> import os
+> keys = ['NEXT_PUBLIC_SITE_URL','NEXT_PUBLIC_SUPABASE_URL','NEXT_PUBLIC_SUPABASE_ANON_KEY','SUPABASE_SERVICE_ROLE_KEY','POE_API_KEY','POE_BASE_URL']
+> with open('.env.local','w') as f:
+>     f.writelines(f'{k}={os.environ.get(k,\"\")}\n' for k in keys if os.environ.get(k))
+> "
+> ```
 
 ### 重要注意事項
 

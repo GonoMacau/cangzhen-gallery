@@ -14,7 +14,7 @@ export default function LoginPage() {
         <div className="space-y-1">
           <h1 className="font-display text-2xl">登入藏珍閣</h1>
           <p className="text-sm text-muted-foreground">
-            登入後可留言、與藏家私訊。新訪客直接以 Email 註冊即可。
+            登入後可留言、與藏家私訊。可使用 Google、LINE 或 Email 註冊／登入。
           </p>
         </div>
         <Suspense fallback={<div className="text-sm text-muted-foreground">載入中…</div>}>

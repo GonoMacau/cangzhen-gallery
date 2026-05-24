@@ -244,7 +244,7 @@ export function LoginForm() {
       </Button>
 
       <p className="text-xs text-muted-foreground text-center">
-        登入即代表您同意藏珍閣使用您的 Email 提供站內訊息與留言服務。
+        登入即代表您同意藏珍閣使用您的帳號資料提供站內訊息與留言服務。
       </p>
     </form>
     </div>
