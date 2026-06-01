@@ -150,6 +150,7 @@ if (!admin) return { ok: false, message: "未授權" };
 8. **`export const dynamic = "force-dynamic"`** 已用於 `(site)/layout.tsx` 與 `admin/layout.tsx`，避免快取使用者 cookie 內容。
 9. **不要新增 ORM**（無 Prisma/Drizzle）。所有查詢直接走 `@supabase/supabase-js` query builder。
 10. **不要把 `SUPABASE_SERVICE_ROLE_KEY` 或 `POE_API_KEY` 放在 `NEXT_PUBLIC_*`**。
+11. **後台表單勿用原生 `<select>`（行動裝置相容）**：部分 Android 在祖先 `overflow-x-hidden` 或 sticky 區塊下，原生下拉無法開啟。藏品表單（`item-form.tsx`）的分類／狀態已改用 `@/components/ui/select`（Radix Portal）+ `hidden` input 送表；`admin/layout.tsx` 的 `<main>` 僅用 `min-w-0`，勿加 `overflow-x-hidden`。底部 sticky 儲存列需 `pointer-events-none`，按鈕加 `pointer-events-auto`。
 
 ---
 
@@ -168,6 +169,7 @@ if (!admin) return { ok: false, message: "未授權" };
 | 增加聯絡 / 關於頁文字 | 後台 → 站點設定 → 聯絡資訊 / about_html |
 | 新增藝品分類 | 後台 → 分類管理；或編輯 `DEFAULT_CATEGORIES` 並 reseed |
 | 新增 UI 基礎元件 | `src/components/ui/<name>.tsx`（仿其他檔案的 cva 寫法） |
+| 後台下拉選單（需相容手機） | 用 `Select`（`src/components/ui/select.tsx`），表單用 `hidden` name；勿在 admin 內嵌原生 `<select>` |
 | 修改全域樣式 / 主題色 | `src/app/globals.css`（Tailwind v4 用 `@theme`） |
 | 設定 LINE 登入 | `docs/line-login-setup.md` 或 `scripts/setup-line-provider.mjs` |
 

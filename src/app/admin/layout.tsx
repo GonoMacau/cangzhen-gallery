@@ -105,7 +105,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
           ))}
         </nav>
-        <main className="flex-1 p-4 md:p-8 bg-background overflow-x-hidden">{children}</main>
+        <main className="flex-1 min-w-0 p-4 md:p-8 bg-background">{children}</main>
       </div>
     </div>
   );

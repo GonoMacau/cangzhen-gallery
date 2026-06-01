@@ -9,6 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { upsertItemAction, type ItemFormState } from "@/app/admin/items/actions";
 import type { Category, Item } from "@/types/database";
@@ -22,6 +29,9 @@ interface Props {
 }
 
 const initialState: ItemFormState = { ok: false };
+
+/** Radix Select 不支援空字串 value，用 sentinel 代表「未分類」 */
+const CATEGORY_NONE = "__none__";
 
 export function ItemForm({ categories, item, uploadedImageUrls = [] }: Props) {
   const router = useRouter();
@@ -111,32 +121,42 @@ export function ItemForm({ categories, item, uploadedImageUrls = [] }: Props) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="category_id">分類</Label>
-              <select
-                id="category_id"
-                name="category_id"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+              <Select
+                value={categoryId || CATEGORY_NONE}
+                onValueChange={(v) => setCategoryId(v === CATEGORY_NONE ? "" : v)}
               >
-                <option value="">未分類</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+                <SelectTrigger id="category_id" aria-label="分類">
+                  <SelectValue placeholder="未分類" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={CATEGORY_NONE}>未分類</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="category_id" value={categoryId} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">狀態</Label>
-              <select
-                id="status"
-                name="status"
+              <Select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as keyof typeof ITEM_STATUS)}
-                className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                onValueChange={(v) => setStatus(v as keyof typeof ITEM_STATUS)}
               >
-                {Object.entries(ITEM_STATUS).map(([k, v]) => (
-                  <option key={k} value={k}>{v.label}</option>
-                ))}
-              </select>
+                <SelectTrigger id="status" aria-label="狀態">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(ITEM_STATUS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>
+                      {v.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="status" value={status} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="era">年代</Label>
@@ -236,8 +256,8 @@ export function ItemForm({ categories, item, uploadedImageUrls = [] }: Props) {
         </p>
       )}
 
-      <div className="flex justify-end gap-2 sticky bottom-0 bg-background/85 backdrop-blur py-3 -mx-4 px-4 border-t">
-        <Button type="submit" disabled={isPending}>
+      <div className="sticky bottom-0 z-10 flex justify-end gap-2 border-t bg-background/85 py-3 backdrop-blur -mx-4 px-4 pointer-events-none">
+        <Button type="submit" disabled={isPending} className="pointer-events-auto">
           {isPending ? "儲存中…" : item ? "儲存變更" : "建立藏品"}
         </Button>
       </div>
