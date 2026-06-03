@@ -11,7 +11,7 @@ export default async function AdminSettingsPage() {
       <header>
         <h1 className="font-display text-3xl">站點設定</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          可調整圖片壓縮參數、AI 模型、聯絡資訊與關於頁文字。
+          可調整圖片壓縮參數、AI 模型、聯絡資訊（含地址地圖、LINE QR）與關於頁文字。
         </p>
       </header>
       <SettingsForm settings={settings} />

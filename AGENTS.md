@@ -166,7 +166,7 @@ if (!admin) return { ok: false, message: "未授權" };
 | 改 AI prompt | `src/lib/poe.ts` 的 `buildAiPrompt` |
 | 改 AI 模型 | 後台 → 站點設定 → AI 模型；或改 `DEFAULT_SETTINGS.ai_model` |
 | 改圖片壓縮 | 後台 → 站點設定；或改 `DEFAULT_SETTINGS.image_*` |
-| 增加聯絡 / 關於頁文字 | 後台 → 站點設定 → 聯絡資訊 / about_html |
+| 增加聯絡 / 關於頁文字 | 後台 → 站點設定 → 聯絡資訊（含地址、LINE QR）/ about_html；地址地圖見 `src/components/site/address-map.tsx`；QR 存 `site-assets` bucket |
 | 新增藝品分類 | 後台 → 分類管理；或編輯 `DEFAULT_CATEGORIES` 並 reseed |
 | 新增 UI 基礎元件 | `src/components/ui/<name>.tsx`（仿其他檔案的 cva 寫法） |
 | 後台下拉選單（需相容手機） | 用 `Select`（`src/components/ui/select.tsx`），表單用 `hidden` name；勿在 admin 內嵌原生 `<select>` |

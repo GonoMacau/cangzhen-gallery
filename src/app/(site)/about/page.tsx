@@ -1,11 +1,20 @@
+import Image from "next/image";
 import { SITE } from "@/lib/constants";
 import { getSettings } from "@/lib/settings";
+import { AddressMap } from "@/components/site/address-map";
 
 export const metadata = { title: "關於藏珍閣" };
 export const revalidate = 300;
 
 export default async function AboutPage() {
   const settings = await getSettings();
+  const hasContact =
+    !!settings.contact_phone ||
+    !!settings.contact_line ||
+    !!settings.contact_email ||
+    !!settings.contact_address?.trim() ||
+    !!settings.contact_line_qr_url?.trim();
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl space-y-8">
       <header className="text-center space-y-3">
@@ -29,33 +38,59 @@ export default async function AboutPage() {
         )}
       </div>
 
-      <div className="rounded-lg border bg-card p-6 space-y-3 text-sm">
+      <div className="rounded-lg border bg-card p-6 space-y-6 text-sm">
         <h2 className="font-display text-xl">聯繫方式</h2>
-        <dl className="grid grid-cols-3 gap-y-2">
-          {settings.contact_phone && (
-            <>
-              <dt className="text-muted-foreground">電話</dt>
-              <dd className="col-span-2">{settings.contact_phone}</dd>
-            </>
-          )}
-          {settings.contact_line && (
-            <>
-              <dt className="text-muted-foreground">LINE</dt>
-              <dd className="col-span-2">{settings.contact_line}</dd>
-            </>
-          )}
-          {settings.contact_email && (
-            <>
-              <dt className="text-muted-foreground">Email</dt>
-              <dd className="col-span-2">{settings.contact_email}</dd>
-            </>
-          )}
-          {!settings.contact_phone && !settings.contact_line && !settings.contact_email && (
-            <p className="text-muted-foreground col-span-3">
-              站內登入後即可使用訊息功能與藏家直接對話。
-            </p>
-          )}
-        </dl>
+        {hasContact ? (
+          <>
+            <dl className="grid grid-cols-3 gap-y-2">
+              {settings.contact_phone && (
+                <>
+                  <dt className="text-muted-foreground">電話</dt>
+                  <dd className="col-span-2">{settings.contact_phone}</dd>
+                </>
+              )}
+              {settings.contact_line && (
+                <>
+                  <dt className="text-muted-foreground">LINE</dt>
+                  <dd className="col-span-2">{settings.contact_line}</dd>
+                </>
+              )}
+              {settings.contact_email && (
+                <>
+                  <dt className="text-muted-foreground">Email</dt>
+                  <dd className="col-span-2">{settings.contact_email}</dd>
+                </>
+              )}
+              {settings.contact_address?.trim() && (
+                <>
+                  <dt className="text-muted-foreground">地址</dt>
+                  <dd className="col-span-2">{settings.contact_address}</dd>
+                </>
+              )}
+            </dl>
+            {settings.contact_address?.trim() ? (
+              <AddressMap address={settings.contact_address} />
+            ) : null}
+            {settings.contact_line_qr_url?.trim() ? (
+              <div className="flex flex-col sm:flex-row items-center gap-4 pt-2 border-t">
+                <p className="text-muted-foreground shrink-0">掃描加入 LINE</p>
+                <div className="relative size-44 rounded-md border bg-background overflow-hidden">
+                  <Image
+                    src={settings.contact_line_qr_url}
+                    alt="LINE QR Code"
+                    fill
+                    sizes="176px"
+                    className="object-contain p-2"
+                  />
+                </div>
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <p className="text-muted-foreground">
+            站內登入後即可使用訊息功能與藏家直接對話。
+          </p>
+        )}
       </div>
     </div>
   );

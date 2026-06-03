@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { saveSettingsAction } from "@/app/admin/settings/actions";
+import { LineQrManager } from "@/components/admin/line-qr-manager";
+import { AddressMap } from "@/components/site/address-map";
 import type { AppSettings } from "@/lib/constants";
 
 interface Props {
@@ -20,6 +22,7 @@ export function SettingsForm({ settings }: Props) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [aiSearch, setAiSearch] = useState<boolean>(!!settings.ai_enable_web_search);
+  const [addressPreview, setAddressPreview] = useState<string>(settings.contact_address ?? "");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -119,19 +122,39 @@ export function SettingsForm({ settings }: Props) {
           <CardTitle>聯絡資訊</CardTitle>
           <CardDescription>顯示於關於頁與站尾。</CardDescription>
         </CardHeader>
-        <CardContent className="grid md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="contact_phone">電話</Label>
-            <Input id="contact_phone" name="contact_phone" defaultValue={settings.contact_phone ?? ""} />
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact_phone">電話</Label>
+              <Input id="contact_phone" name="contact_phone" defaultValue={settings.contact_phone ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact_line">LINE ID</Label>
+              <Input id="contact_line" name="contact_line" defaultValue={settings.contact_line ?? ""} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact_email">Email</Label>
+              <Input id="contact_email" name="contact_email" type="email" defaultValue={settings.contact_email ?? ""} />
+            </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contact_line">LINE ID</Label>
-            <Input id="contact_line" name="contact_line" defaultValue={settings.contact_line ?? ""} />
+            <Label htmlFor="contact_address">地址</Label>
+            <Input
+              id="contact_address"
+              name="contact_address"
+              defaultValue={settings.contact_address ?? ""}
+              placeholder="例：台北市信義區…"
+              onChange={(e) => setAddressPreview(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">儲存後會顯示於關於頁，並嵌入 Google 地圖。</p>
+            {addressPreview.trim() ? (
+              <div className="space-y-2 pt-2">
+                <p className="text-xs text-muted-foreground">地圖預覽</p>
+                <AddressMap address={addressPreview} />
+              </div>
+            ) : null}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="contact_email">Email</Label>
-            <Input id="contact_email" name="contact_email" type="email" defaultValue={settings.contact_email ?? ""} />
-          </div>
+          <LineQrManager initialUrl={settings.contact_line_qr_url ?? ""} />
         </CardContent>
       </Card>
 

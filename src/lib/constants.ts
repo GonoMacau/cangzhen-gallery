@@ -37,6 +37,8 @@ export const DEFAULT_SETTINGS = {
   contact_phone: "",
   contact_line: "",
   contact_email: "",
+  contact_address: "",
+  contact_line_qr_url: "",
   about_html: "",
 } as const;
 
