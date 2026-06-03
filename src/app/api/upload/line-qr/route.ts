@@ -3,11 +3,10 @@ import sharp from "sharp";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { LINE_QR_STORAGE_BUCKET, lineQrStoragePath } from "@/lib/line-qr-storage";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
-
-const SITE_ASSETS_BUCKET = "site-assets";
 const MAX_BYTES = 2 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
@@ -55,17 +54,17 @@ export async function POST(req: Request) {
     );
   }
 
-  const storagePath = `site/line-qr.${ext}`;
+  const storagePath = lineQrStoragePath(ext);
   const adminCli = createSupabaseAdminClient();
 
   const { error: uploadErr } = await adminCli.storage
-    .from(SITE_ASSETS_BUCKET)
+    .from(LINE_QR_STORAGE_BUCKET)
     .upload(storagePath, buffer, { contentType, upsert: true });
   if (uploadErr) {
     return NextResponse.json({ error: uploadErr.message }, { status: 500 });
   }
 
-  const { data: pub } = adminCli.storage.from(SITE_ASSETS_BUCKET).getPublicUrl(storagePath);
+  const { data: pub } = adminCli.storage.from(LINE_QR_STORAGE_BUCKET).getPublicUrl(storagePath);
   const url = pub.publicUrl;
 
   const supabase = await createSupabaseServerClient();

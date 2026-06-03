@@ -6,15 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_SETTINGS } from "@/lib/constants";
 import { getSettings } from "@/lib/settings";
-
-const SITE_ASSETS_BUCKET = "site-assets";
-
-function storagePathFromQrUrl(url: string): string | null {
-  const marker = `/storage/v1/object/public/${SITE_ASSETS_BUCKET}/`;
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  return decodeURIComponent(url.slice(idx + marker.length));
-}
+import { parseLineQrStorageUrl } from "@/lib/line-qr-storage";
 
 function clampInt(v: unknown, min: number, max: number, fallback: number): number {
   const n = Number(v);
@@ -63,9 +55,9 @@ export async function deleteLineQrAction() {
   if (!url) return { ok: true };
 
   const adminCli = createSupabaseAdminClient();
-  const path = storagePathFromQrUrl(url);
-  if (path) {
-    await adminCli.storage.from(SITE_ASSETS_BUCKET).remove([path]);
+  const parsed = parseLineQrStorageUrl(url);
+  if (parsed) {
+    await adminCli.storage.from(parsed.bucket).remove([parsed.path]);
   }
 
   const supabase = await createSupabaseServerClient();
