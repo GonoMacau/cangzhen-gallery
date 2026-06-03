@@ -6,7 +6,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { slugify } from "@/lib/utils";
+import { isDraftPlaceholderSlug, slugify } from "@/lib/utils";
 
 const itemSchema = z.object({
   title: z.string().min(1, "請輸入品名").max(120),
@@ -90,11 +90,21 @@ export async function upsertItemAction(
   } as const;
 
   let resultId = id;
+  let previousSlug: string | null = null;
   if (id) {
-    // 若現有 slug 含有非 ASCII 字元（例如中文），自動重新產生合法 slug
     const updatePayload: typeof payload & { slug?: string } = { ...payload };
-    const { data: existing } = await supabase.from("items").select("slug").eq("id", id).maybeSingle();
-    if (existing?.slug && /[^\x00-\x7F]/.test(existing.slug)) {
+    const { data: existing } = await supabase
+      .from("items")
+      .select("slug")
+      .eq("id", id)
+      .maybeSingle();
+    previousSlug = existing?.slug ?? null;
+    const needsAsciiSlug = existing?.slug && /[^\x00-\x7F]/.test(existing.slug);
+    const needsPublishSlug =
+      existing?.slug &&
+      isDraftPlaceholderSlug(existing.slug) &&
+      (data.status === "published" || payload.title.trim() !== "（草稿）");
+    if (needsAsciiSlug || needsPublishSlug) {
       updatePayload.slug = slugify(payload.title);
     }
     const { error } = await supabase.from("items").update(updatePayload).eq("id", id);
@@ -115,6 +125,9 @@ export async function upsertItemAction(
   revalidatePath("/");
   if (resultId) {
     const { data: row } = await supabase.from("items").select("slug").eq("id", resultId).maybeSingle();
+    if (previousSlug && previousSlug !== row?.slug) {
+      revalidatePath(`/items/${previousSlug}`);
+    }
     if (row?.slug) revalidatePath(`/items/${row.slug}`);
   }
   return { ok: true, message: "已儲存", itemId: resultId ?? undefined };

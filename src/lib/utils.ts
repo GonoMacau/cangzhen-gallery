@@ -14,6 +14,11 @@ export function formatDate(input: string | Date): string {
   });
 }
 
+/** 建立草稿時產生的暫用 slug（例如 draft-s66g95） */
+export function isDraftPlaceholderSlug(slug: string): boolean {
+  return /^draft-[a-z0-9]{6}$/.test(slug);
+}
+
 export function slugify(text: string): string {
   const random = Math.random().toString(36).slice(2, 8);
   const base = text
