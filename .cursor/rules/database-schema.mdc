@@ -52,6 +52,16 @@ alwaysApply: false
 - `public.handle_new_message()` — 新訊息更新 conversation 計數
 - `public.promote_to_admin(email)` — 將指定 email 設為 admin（在 0002 migration）
 
+## 套用遠端 Migration（Agent 必做）
+
+新增或修改 `supabase/migrations/*.sql` 後，**同一輪對話內**執行：
+
+```bash
+npm run db:apply
+```
+
+（`PASSWORD` = Supabase **Database password**；詳見 `.cursor/rules/supabase-migrations-apply.mdc`）
+
 ## Storage
 
 只有一個 bucket：**`items`**（public）。

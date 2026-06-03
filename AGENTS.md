@@ -161,7 +161,7 @@ if (!admin) return { ok: false, message: "未授權" };
 | 新增一個前台頁面 | `src/app/(site)/<route>/page.tsx`（已自動套 SiteHeader/Footer） |
 | 新增一個後台頁面 | `src/app/admin/<route>/page.tsx`（layout 已守門 admin） |
 | 新增一個 Server Action | 同目錄建 `actions.ts`，第一行 `"use server"`，務必 `requireAdmin()` + `revalidatePath()` |
-| 新增 / 修改資料表 | 在 `supabase/migrations/` 新增 `000X_*.sql`，**同步更新** `src/types/database.ts` |
+| 新增 / 修改資料表 | 在 `supabase/migrations/` 新增 `000X_*.sql`，**同步更新** `src/types/database.ts`，並執行 **`npm run db:apply`**（見 `.cursor/rules/supabase-migrations-apply.mdc`） |
 | 新增 RLS 規則 | 在新 migration 內 `enable row level security` + `create policy`，公開或 `is_admin()` 二選一 |
 | 改 AI prompt | `src/lib/poe.ts` 的 `buildAiPrompt` |
 | 改 AI 模型 | 後台 → 站點設定 → AI 模型；或改 `DEFAULT_SETTINGS.ai_model` |
@@ -183,6 +183,7 @@ npm run build      # production build
 npm run start      # 啟動 production server
 npm run lint       # eslint（next-config）
 npm run typecheck  # tsc --noEmit
+npm run db:apply   # 套用 supabase/migrations 至遠端（需 .env.local 的 PASSWORD = Database password）
 ```
 
 部署：push 到 GitHub → Vercel 自動 build。**Vercel 環境變數務必設齊**（同 `.env.example`）。

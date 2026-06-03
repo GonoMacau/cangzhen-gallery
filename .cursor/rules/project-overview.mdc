@@ -28,6 +28,6 @@ sharp (webp) · OpenAI SDK → POE (`https://api.poe.com/v1`) · zod · sonner �
 - **路徑別名**：`@/* → src/*`，import 一律使用 `@/...`。
 
 ## 修改流程預設
-1. 動到資料表 → 同步：`migration SQL` + `src/types/database.ts` + 相關 RLS policy
+1. 動到資料表 → 同步：`migration SQL` + `src/types/database.ts` + 相關 RLS policy → **`npm run db:apply`** 套用遠端
 2. 寫 Server Action → 開頭 `requireAdmin()`、結尾 `revalidatePath()`
 3. 跨權限資源（storage / 跳過 RLS）→ 用 `createSupabaseAdminClient()`，且**只能在 server**

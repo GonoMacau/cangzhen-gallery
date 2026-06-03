@@ -1,0 +1,47 @@
+---
+description: 新增或修改 migration 後必須自動套用到遠端 Supabase
+globs: supabase/migrations/**/*.sql
+alwaysApply: false
+---
+
+# Supabase Migration：自動套用遠端
+
+## 何時必須執行
+
+在以下情況完成程式變更後，**同一輪對話內**必須執行遠端套用（不要只提交 SQL 檔）：
+
+- 新增或修改 `supabase/migrations/*.sql`
+- 使用者回報 schema / bucket / policy 與 migration 不符
+- 功能依賴新 settings 種子、Storage bucket、RLS
+
+## 必做步驟（依序）
+
+1. **撰寫 migration**（冪等、版本號唯一，見 `database-schema.mdc`）
+2. **同步** `src/types/database.ts`（若有表結構變更）
+3. **套用遠端**（擇一，優先 A）：
+   ```bash
+   npm run db:apply
+   ```
+   或 `node scripts/apply-supabase-migrations.mjs`
+
+   - 讀取 `.env.local` 的 `NEXT_PUBLIC_SUPABASE_URL` 與 `PASSWORD`（**Database password**，非 anon key）
+   - 預覽：`npm run db:apply -- --dry-run`
+
+4. **若 db push 失敗**（版本衝突、權限）：
+   - 執行 `node scripts/apply-supabase-contact.mjs` 僅補 settings / 驗證 bucket（REST，適用種子資料）
+   - 向使用者說明需在 Dashboard SQL Editor 手動執行該 migration 檔
+
+5. **回報結果**：列出已套用檔名或 CLI 輸出摘要，勿在回覆中貼出 `.env` 密碼。
+
+## 禁止
+
+- 僅 commit migration 而不嘗試 `npm run db:apply`
+- 要求使用者「記得自己去 Supabase 跑 SQL」而未先自行執行腳本
+- 使用 `site-assets` bucket；站點靜態檔用既有 **`items`**（例：`site/line-qr.*`）
+
+## 相關腳本
+
+| 腳本 | 用途 |
+|------|------|
+| `scripts/apply-supabase-migrations.mjs` | `supabase db push` 套用全部 pending migrations |
+| `scripts/apply-supabase-contact.mjs` | REST 補 contact settings、檢查 `items` bucket |

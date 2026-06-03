@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:apply": "node scripts/apply-supabase-migrations.mjs",
+    "db:apply:dry-run": "node scripts/apply-supabase-migrations.mjs --dry-run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
