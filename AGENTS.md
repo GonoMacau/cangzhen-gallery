@@ -172,6 +172,7 @@ if (!admin) return { ok: false, message: "未授權" };
 | 後台下拉選單（需相容手機） | 用 `Select`（`src/components/ui/select.tsx`），表單用 `hidden` name；勿在 admin 內嵌原生 `<select>` |
 | 修改全域樣式 / 主題色 | `src/app/globals.css`（Tailwind v4 用 `@theme`） |
 | 設定 LINE 登入 | `docs/line-login-setup.md` 或 `scripts/setup-line-provider.mjs` |
+| 測試訪客帳號 / cron | `src/lib/test-accounts.ts`、`.cursor/rules/test-accounts.mdc` |
 
 ---
 
@@ -187,6 +188,13 @@ npm run db:apply   # 套用 supabase/migrations 至遠端（需 .env.local 的 P
 ```
 
 部署：push 到 GitHub → Vercel 自動 build。**Vercel 環境變數務必設齊**（同 `.env.example`）。
+
+### Vercel Cron（Supabase keep-alive）
+
+- `vercel.json` → 每日 `0 3 * * *` 呼叫 `/api/cron/keep-alive`
+- 實作：`src/app/api/cron/keep-alive/route.ts`（驗證 `CRON_SECRET` → `signInWithPassword` 測試帳號 → `settings` 查一筆 → `signOut`）
+- **必設** Vercel 環境變數 `CRON_SECRET`（Bearer token，與 Vercel Cron 自動帶入的 header 一致）
+- 測試帳號：`src/lib/test-accounts.ts`（`TEST_CLIENT_ACCOUNT`）
 
 ---
 

@@ -27,6 +27,10 @@ sharp (webp) · OpenAI SDK → POE (`https://api.poe.com/v1`) · zod · sonner �
 - **不要把 `SUPABASE_SERVICE_ROLE_KEY` / `POE_API_KEY` 放進 `NEXT_PUBLIC_*`**。
 - **路徑別名**：`@/* → src/*`，import 一律使用 `@/...`。
 
+## 測試帳號（訪客，非 admin）
+- Email：`eric.chang.1015+tester@gmail.com` / 密碼：`a1234567`
+- 常數：`src/lib/test-accounts.ts`；cron 喚醒 Supabase 亦使用此帳號
+
 ## 修改流程預設
 1. 動到資料表 → 同步：`migration SQL` + `src/types/database.ts` + 相關 RLS policy → **`npm run db:apply`** 套用遠端
 2. 寫 Server Action → 開頭 `requireAdmin()`、結尾 `revalidatePath()`

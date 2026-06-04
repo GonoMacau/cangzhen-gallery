@@ -1,0 +1,29 @@
+---
+description: 共用測試帳號與 cron keep-alive（手動測試、E2E 時參考）
+alwaysApply: false
+---
+
+# 測試帳號
+
+| 用途 | Email | 密碼 | 角色 |
+|---|---|---|---|
+| 一般訪客 / cron 喚醒 Supabase | `eric.chang.1015+tester@gmail.com` | `a1234567` | guest（非管理員） |
+
+常數定義：`src/lib/test-accounts.ts`（`TEST_CLIENT_ACCOUNT`）。
+
+## 首次使用
+
+1. 到 `/login` 用上述 Email **註冊一次**（若尚未存在）。
+2. 勿將此帳號設為 admin；後台與上傳測試請用父親的管理員帳號。
+
+## Cron keep-alive
+
+- 路徑：`GET /api/cron/keep-alive`
+- 排程：每日 03:00 UTC（`vercel.json`）
+- Vercel 會帶 `Authorization: Bearer <CRON_SECRET>`；專案需設定環境變數 `CRON_SECRET`（建議 32+ 字元隨機字串）。
+
+本地驗證：
+
+```bash
+curl -H "Authorization: Bearer 你的CRON_SECRET" http://localhost:3000/api/cron/keep-alive
+```

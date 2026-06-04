@@ -93,6 +93,24 @@ npm run dev
 4. Deploy。
 5. 部署完成後，進入 Supabase Dashboard → Authentication → URL Configuration，把 `Site URL` 設為您的正式網址，並把該網址加入 `Redirect URLs`。
 
+### Supabase 定期喚醒（Vercel Cron）
+
+免費版 Supabase 若超過約 7 日無 API 活動可能暫停專案。本專案已設定 **每日** cron 呼叫 `GET /api/cron/keep-alive`，以測試帳號登入並查詢資料庫，維持專案活躍。
+
+1. 在 Vercel → Environment Variables 新增 **`CRON_SECRET`**（建議 32 字元以上隨機字串）。
+2. 確認測試帳號已在網站註冊過一次（見下方「測試帳號」）。
+3. 重新 Deploy 後，於 Vercel → Project → Cron Jobs 確認排程為每日 03:00 UTC。
+
+排程定義於根目錄 `vercel.json`（Hobby 方案每日最多觸發一次，已符合需求）。
+
+### 測試帳號（訪客 / cron）
+
+| Email | 密碼 |
+|---|---|
+| `eric.chang.1015+tester@gmail.com` | `a1234567` |
+
+用途：手動測試留言、私訊、cron 喚醒；**非管理員**。常數見 `src/lib/test-accounts.ts`。
+
 ### LINE 登入設定
 
 LINE 登入需要在 Supabase 內建立 **Custom OAuth Provider**（型別必須為 `OAuth2` 而非 OIDC，
@@ -130,6 +148,7 @@ src/
     (site)/                 公開頁面（含 layout）
     admin/                  後台頁面
     api/                    Route Handlers
+      cron/keep-alive/      Vercel Cron 喚醒 Supabase
       ai/describe/          POE AI 補述
       upload/               圖片上傳壓縮
     auth/callback/          Supabase Auth callback
