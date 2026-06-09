@@ -12,6 +12,7 @@ import { ContactAdminButton } from "@/components/site/contact-admin-button";
 import { getItemBySlug } from "@/lib/queries";
 import { ITEM_STATUS, SITE } from "@/lib/constants";
 import { env } from "@/lib/env";
+import { buildOgImages } from "@/lib/metadata";
 import { formatDate, simpleMarkdown } from "@/lib/utils";
 import { getCurrentProfile } from "@/lib/auth";
 
@@ -23,16 +24,37 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const item = await getItemBySlug(slug);
   if (!item) return { title: "藏品" };
-  const cover = item.images?.[0]?.url || item.cover_image_url || undefined;
+  const coverImage = item.images?.[0];
+  const coverUrl = coverImage?.url || item.cover_image_url || undefined;
   const desc = item.summary || item.ai_description?.slice(0, 100) || `${SITE.name}藏品：${item.title}`;
+  const ogTitle = `${item.title} · ${SITE.name}`;
+  const ogImages = buildOgImages(
+    coverUrl
+      ? {
+          url: coverUrl,
+          width: coverImage?.width,
+          height: coverImage?.height,
+          alt: item.title,
+        }
+      : null,
+  );
+
   return {
     title: item.title,
     description: desc,
+    alternates: { canonical: `/items/${slug}` },
     openGraph: {
-      title: `${item.title} · ${SITE.name}`,
+      title: ogTitle,
       description: desc,
       type: "article",
-      images: cover ? [cover] : [],
+      url: `/items/${slug}`,
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: desc,
+      images: coverUrl ? [coverUrl] : undefined,
     },
   };
 }
