@@ -50,7 +50,10 @@ alwaysApply: false
 - `public.handle_new_user()` — auth.users insert trigger，自動建 profile
 - `public.touch_updated_at()` — before update trigger，更新 `updated_at`
 - `public.handle_new_message()` — 新訊息更新 conversation 計數
-- `public.promote_to_admin(email)` — 將指定 email 設為 admin（在 0002 migration）
+- `public.guard_conversation_update()` — 擋訪客改 `unread_for_admin`；巢狀 trigger 放行（0006）
+- `public.promote_to_admin(email)` — 將指定 email 設為 admin（0002 建立；**0006/0007 REVOKE 公開 EXECUTE**，僅 SQL Editor / service_role）
+- `public.protect_profile_privileged_columns()` — 擋非 admin 改 `role` / `is_banned`（0006）
+- `public.enforce_message_sender()` — 覆寫 `messages.sender_role`、禁言檢查（0006）
 
 ## 套用遠端 Migration（Agent 必做）
 
@@ -58,6 +61,12 @@ alwaysApply: false
 
 ```bash
 npm run db:apply
+```
+
+若因兩個 `0003_*.sql` 版本號衝突失敗，安全 hardening 改跑：
+
+```bash
+npm run db:apply-security
 ```
 
 （`PASSWORD` = Supabase **Database password**；詳見 `.cursor/rules/supabase-migrations-apply.mdc`）

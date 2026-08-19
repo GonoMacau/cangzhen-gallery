@@ -29,8 +29,27 @@ export function getSupabaseProjectRef(url) {
   return new URL(url.replace(/\/$/, "")).hostname.split(".")[0];
 }
 
+/**
+ * 建構 Postgres 連線字串（供 supabase db push / query）。
+ * 優先 SUPABASE_DB_URL；否則走 Session pooler（IPv4）。
+ * 區域 / 編號可用 SUPABASE_DB_POOLER_REGION、SUPABASE_DB_POOLER_INDEX 覆寫。
+ */
+export async function buildSupabaseDbUrlAsync(supabaseUrl, dbPassword) {
+  if (process.env.SUPABASE_DB_URL) {
+    return process.env.SUPABASE_DB_URL;
+  }
+  const ref = getSupabaseProjectRef(supabaseUrl);
+  const encoded = encodeURIComponent(dbPassword);
+  const region = process.env.SUPABASE_DB_POOLER_REGION ?? "ap-southeast-1";
+  const poolerIndex = process.env.SUPABASE_DB_POOLER_INDEX ?? "1";
+  return `postgresql://postgres.${ref}:${encoded}@aws-${poolerIndex}-${region}.pooler.supabase.com:5432/postgres`;
+}
+
+/** @deprecated 請改用 buildSupabaseDbUrlAsync */
 export function buildSupabaseDbUrl(supabaseUrl, dbPassword) {
   const ref = getSupabaseProjectRef(supabaseUrl);
   const encoded = encodeURIComponent(dbPassword);
-  return `postgresql://postgres:${encoded}@db.${ref}.supabase.co:5432/postgres`;
+  const region = process.env.SUPABASE_DB_POOLER_REGION ?? "ap-southeast-1";
+  const poolerIndex = process.env.SUPABASE_DB_POOLER_INDEX ?? "1";
+  return `postgresql://postgres.${ref}:${encoded}@aws-${poolerIndex}-${region}.pooler.supabase.com:5432/postgres`;
 }

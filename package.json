@@ -10,7 +10,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "db:apply": "node scripts/apply-supabase-migrations.mjs",
-    "db:apply:dry-run": "node scripts/apply-supabase-migrations.mjs --dry-run"
+    "db:apply:dry-run": "node scripts/apply-supabase-migrations.mjs --dry-run",
+    "db:apply-security": "node scripts/apply-security-migrations.mjs",
+    "security:proof": "node scripts/security-audit-proof.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -51,6 +53,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "pg": "^8.23.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

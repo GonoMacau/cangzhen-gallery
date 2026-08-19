@@ -8,6 +8,9 @@ import { getSettings } from "@/lib/settings";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function POST(req: Request) {
   const admin = await requireAdmin();
   if (!admin) {
@@ -16,9 +19,13 @@ export async function POST(req: Request) {
 
   const formData = await req.formData();
   const file = formData.get("file");
-  const itemId = formData.get("item_id");
+  const itemIdRaw = formData.get("item_id");
+  const itemId = itemIdRaw ? String(itemIdRaw) : "";
   if (!(file instanceof File) || !itemId) {
     return NextResponse.json({ error: "缺少檔案或藏品 ID" }, { status: 400 });
+  }
+  if (!UUID_RE.test(itemId)) {
+    return NextResponse.json({ error: "藏品 ID 格式無效" }, { status: 400 });
   }
   if (file.size > 25 * 1024 * 1024) {
     return NextResponse.json({ error: "檔案不可超過 25MB" }, { status: 400 });

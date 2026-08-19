@@ -66,15 +66,32 @@ cp .env.example .env.local
 3. `supabase/migrations/0003_user_ban.sql`（使用者禁言欄位與留言 policy）
 4. `supabase/migrations/0004_profile_relations.sql`（PostgREST 關聯至 profiles）
 5. `supabase/migrations/0005_oauth_metadata_fallback.sql`（LINE/Google OAuth 暱稱與頭像回填）
+6. `supabase/migrations/0006_security_hardening.sql`（**安全硬化**：鎖 RPC、保護 role/禁言、私訊身份）
+7. `supabase/migrations/0007_security_rpc_lockdown.sql`（RPC EXECUTE 明確 GRANT 補強）
+
+或在本機已設定 `PASSWORD`（Database password）時執行：
+
+```bash
+npm run db:apply
+```
+
+> **注意**：repo 有兩個 `0003_*.sql`，`supabase db push` 可能因版本號重複失敗。若失敗，請改執行：
+> ```bash
+> npm run db:apply-security
+> ```
+> 或在 Dashboard SQL Editor 依序貼上 `0006`、`0007`。驗證：`npm run security:proof`。
 
 ### 3. 將父親的帳號設定為管理員
 
 1. 父親到網站 `/login` 用 **Email** 註冊一次（若使用 LINE/Google 登入且無 email，請改在 Supabase Dashboard 手動將該使用者的 `profiles.role` 設為 `admin`）。
-2. 在 Supabase SQL Editor 執行：
+2. 在 Supabase Dashboard → **SQL Editor**（postgres 身份，**不可**用 anon key / 瀏覽器 REST）執行：
    ```sql
    select public.promote_to_admin('your_dad_email@example.com');
    ```
+   > 0006 之後 `promote_to_admin` 已 **REVOKE** 公開 EXECUTE；僅 SQL Editor / service_role 可呼叫。詳見 [`docs/SECURITY_AUDIT.md`](./docs/SECURITY_AUDIT.md)。
 3. 父親重新整理頁面，右上角會出現「後台」按鈕。
+
+**替代方式**：Table Editor → `profiles` → 將該列 `role` 改為 `admin`。
 
 ### 4. 本機啟動
 
@@ -169,7 +186,7 @@ src/
   proxy.ts                  Next.js middleware（Supabase session refresh）
 ```
 
-另見 `docs/line-login-setup.md` 與 `scripts/setup-line-provider.mjs`（LINE Custom OAuth2 Provider 設定）。
+另見 `docs/line-login-setup.md`、`docs/SECURITY_AUDIT.md` 與 `scripts/setup-line-provider.mjs`（LINE Custom OAuth2 Provider 設定）。
 
 ## 五、常見問題
 

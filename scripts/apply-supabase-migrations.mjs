@@ -8,6 +8,7 @@
  * 讀取 .env.local：
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - PASSWORD（Supabase Database password，Dashboard → Settings → Database）
+ *   - 選填 SUPABASE_DB_URL（自訂連線字串）
  *
  * 選用：--dry-run  僅列出將套用的 migration
  */
@@ -17,7 +18,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   loadProjectEnv,
-  buildSupabaseDbUrl,
+  buildSupabaseDbUrlAsync,
 } from "./lib/load-dotenv.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -39,17 +40,17 @@ if (!dbPassword) {
   );
 }
 
-const dbUrl = buildSupabaseDbUrl(url, dbPassword);
-const flags = ["--db-url", dbUrl, "--yes"];
-if (dryRun) flags.push("--dry-run");
-
 console.log("[db:apply] 目標：", url.replace(/\/$/, ""));
 if (dryRun) console.log("[db:apply] dry-run：僅預覽，不寫入");
 
+const dbUrl = await buildSupabaseDbUrlAsync(url, dbPassword);
+
 try {
-  execSync("npx", ["supabase", "db", "push", ...flags], {
+  const dryFlag = dryRun ? " --dry-run" : "";
+  execSync(`npx supabase db push --db-url ${JSON.stringify(dbUrl)} --yes${dryFlag}`, {
     stdio: "inherit",
     cwd: projectRoot,
+    shell: true,
   });
   console.log("[db:apply] migration 已套用");
 } catch (e) {

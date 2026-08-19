@@ -85,7 +85,9 @@ supabase/migrations/
 ├── 0002_promote_admin_helper.sql ← promote_to_admin(email) function
 ├── 0003_user_ban.sql             ← profiles.is_banned 欄位 + 留言 policy 更新
 ├── 0004_profile_relations.sql    ← FK 改指向 profiles（PostgREST 內嵌 join）
-└── 0005_oauth_metadata_fallback.sql ← LINE/Google OAuth 暱稱與頭像回填
+├── 0005_oauth_metadata_fallback.sql ← LINE/Google OAuth 暱稱與頭像回填
+├── 0006_security_hardening.sql   ← RPC REVOKE、特權欄位 trigger、私訊硬化
+└── 0007_security_rpc_lockdown.sql ← promote_to_admin GRANT 補強
 ```
 
 ---
@@ -185,6 +187,8 @@ npm run start      # 啟動 production server
 npm run lint       # eslint（next-config）
 npm run typecheck  # tsc --noEmit
 npm run db:apply   # 套用 supabase/migrations 至遠端（需 .env.local 的 PASSWORD = Database password）
+npm run db:apply-security # 僅套用 0006/0007（避開 0003 版本衝突）
+npm run security:proof    # anon key 驗證 RPC / 自改 role / 私訊身份
 ```
 
 部署：push 到 GitHub → Vercel 自動 build。**Vercel 環境變數務必設齊**（同 `.env.example`）。
